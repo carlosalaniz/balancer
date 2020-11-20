@@ -49,7 +49,7 @@ function loadFrame() {
     log("Page checked:", loaded++, " times");
     document.getElementById("frame_container").innerHTML = `
         <iframe
-        id="iframe" " 
+        id="iframe"
         src="https://pools.balancer.exchange/#/pool/0xe2eb726bce7790e57d978c6a2649186c4d481658/" 
         style="width: 0%; height: 0%; border: 0px;"></iframe>
     `;
