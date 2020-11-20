@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 app.post('/balance', async function (req, res) {
-    const { balancer } = req.body;
+    const { balancer, min_delta } = req.body;
     const future = 'BAL-PERP';
     const ResultPayload = {
         future: future,
@@ -26,15 +26,17 @@ app.post('/balance', async function (req, res) {
         ResultPayload.start_position = start_position;
         let delta = (start_position - balancer).toFixed(2);
         if (+delta !== 0) {
-            ResultPayload.amount = Math.abs(delta);
-            if (delta > 0) {
-                await ftx.goLongBy(Math.abs(delta), future);
-                ResultPayload.action_taken = "BUY";
-            } else {
-                await ftx.goShortBy(Math.abs(delta), future);
-                ResultPayload.action_taken = "SELL";
+            if (Math.abs(delta) >= min_delta) {
+                ResultPayload.amount = Math.abs(delta);
+                if (delta > 0) {
+                    await ftx.goLongBy(Math.abs(delta), future);
+                    ResultPayload.action_taken = "BUY";
+                } else {
+                    await ftx.goShortBy(Math.abs(delta), future);
+                    ResultPayload.action_taken = "SELL";
+                }
+                ResultPayload.new_position = (await ftx.getPosition(future)).size;
             }
-            ResultPayload.new_position = (await ftx.getPosition(future)).size;
         }
         res.status(200).json(ResultPayload);
     } catch (e) {

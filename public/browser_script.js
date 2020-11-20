@@ -2,6 +2,7 @@
 
 var last_value = 0;
 var probe_every = 30;
+var min_delta = 0;
 var autoBalancerUrl = "https://balancer.admint.io/balance";
 
 function log(message) {
@@ -60,13 +61,13 @@ function handleValue(value) {
         last_value = value;
         value = value.replace(',', '');
         if (!isNaN(value)) {
-            log("Attempting to balance...", last_value, " to ", value);
-            postData(autoBalancerUrl, { balancer: value })
+            log("Attempting to balance to ", value);
+            postData(autoBalancerUrl, { balancer: value, min_delta: min_delta })
                 .then(data => {
-                    log("Call successful...", data); // JSON data parsed by `data.json()` call
+                    log("Call successful..."); // JSON data parsed by `data.json()` call
                 });
         } else {
-            log(value, "not a value");
+            log(value, "not a number");
         }
     } else {
         log("No change of value detected...", last_value)
@@ -74,10 +75,10 @@ function handleValue(value) {
 }
 
 var interval = null
-
 function startInterval() {
     probe_every = document.getElementById("interval").value;
     autoBalancerUrl = document.getElementById("balance_url").value
+    min_delta = document.getElementById("min_delta").value
 
     log("interval started...")
     loadFrame();
@@ -105,6 +106,9 @@ document.querySelector("html").innerHTML = `
     </br>
     </br>
     <label>Interval (Seconds) <input value="30" id="interval" style="width:100%" type="number"></label>
+    <label>Min delta<input value="0" id="min_delta" style="width:100%" type="number"></label>
+    </br>
+    </br>
     <hr>
     <button onclick="startInterval()">Start</button>
     <button onclick="stopInterval()">Stop</button>
