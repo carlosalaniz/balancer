@@ -64,7 +64,8 @@ function handleValue(value) {
             log("Attempting to balance to ", value);
             postData(autoBalancerUrl, { balancer: value, min_delta: min_delta })
                 .then(data => {
-                    log("Call successful..."); // JSON data parsed by `data.json()` call
+                    log("Trade successful..."); // JSON data parsed by `data.json()` call
+                    log(data); // JSON data parsed by `data.json()` call
                 });
         } else {
             log(value, "not a number");
