@@ -58,7 +58,7 @@ async function placeOrder(amount, side, future) {
             'FTX-SIGN': getSignature(time, "POST", path, JSON.stringify(payload))
         }
     });
-    console.log(response);
+    console.log(response.data);
 }
 
 
