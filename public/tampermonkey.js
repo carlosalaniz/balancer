@@ -18,7 +18,7 @@
     const TIMEOUT = 25;
     const AUTO_BALANCER_ENDPOINT = "https://balancer.admint.io/balance";
     const MIN_DELTA = 0;
-    var StartTrying = 0;
+    var StartTrying = null;
     // get application values 
     var values_collected = null;
 
@@ -40,12 +40,16 @@
     }
 
     function tryFindBalanceToValue(callback) {
-        if(StartTrying === null){
+        if (StartTrying === null) {
             StartTrying = +new Date();
         }
-        if((+new Date() - StartTrying) > (TIMEOUT*1000)){
+        if ((+new Date() - StartTrying) > (TIMEOUT * 1000)) {
             document.getElementById("refreshing").style.display = "block";
             document.getElementById("refreshing").innerText = "TIMED OUT RELOADING NOW";
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+            return false;
         }
         var BALValueRowResult = contains(document, "a", "BAL");
         if (BALValueRowResult.length > 0) {
@@ -54,6 +58,7 @@
             document.getElementById("current_value").innerText = value;
             if (!isNaN(value)) {
                 callback(value)
+                return true;
             }
         }
         return false;
