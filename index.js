@@ -24,7 +24,7 @@ app.post('/balance', async function (req, res) {
     try {
         let start_position = (await ftx.getPosition(future)).size;
         ResultPayload.start_position = start_position;
-        let delta = (start_position - balancer).toFixed(2);
+        let delta = (start_position - balancer.toFixed(2)).toFixed(2);
         if (+delta !== 0) {
             if (Math.abs(delta) >= min_delta) {
                 ResultPayload.amount = Math.abs(delta);
