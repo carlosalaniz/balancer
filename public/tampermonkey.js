@@ -117,7 +117,7 @@
         newContentNode.innerHTML = `
         <div id="calamardo"><div style="text-align: center;"><div><h1>Auto balancer</h1> <img style=" max-width: 80%; background-image: url('https://www.memeatlas.com/images/pepes/pepe-gets-excited.gif'); background-size: 80px; background-color:whitesmoke; border-radius: 100%; " src="https://i.kym-cdn.com/photos/images/original/000/671/564/804.gif"></div></div><div style="width:80%; margin: 2em auto; border:1px solid black;"></div><div style="text-align: center;"><div style="margin: 1em 0"> <b>Values collected:</b> <span id="values_collected"></span> | <b>Current Value:</b> <span id="current_value">-</span></div><div> Latest response <br><pre style="display: inline-block;text-align: left; background-color: whitesmoke;" id="latest_response"></pre><h2 id="refreshing" style="display:none">Refreshing in <span id="seconds"></span> seconds...</h2></div></div></div>
         `;
-        let htmlEl = getElementsByTagName("html")[0];
+        let htmlEl = document.getElementsByTagName("html")[0];
         htmlEl.appendChild(newContentNode)
         var calamardo = document.getElementById("calamardo");
         calamardo.scrollIntoView();
