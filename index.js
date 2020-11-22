@@ -57,7 +57,8 @@ app.get("/", function (req, res) {
                 sea monsters were believed to exist. It's now used metaphorically to warn people away from unexplored 
                 areas or untried actions. There are no actual dragons, but it is still dangerous.
            </h2>
-           <a href="./browser_script.js">Here be dragons</a>
+           <a href="./browser_script.js">Here be dragons</a> | 
+           <a href="./tampermonkey.js">squidward.js</a>
         </div>
     </html>
     `);
