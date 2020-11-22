@@ -11,7 +11,8 @@ app.use(cors());
 app.use(express.json());
 
 app.post('/balance', async function (req, res) {
-    const { balancer, min_delta } = req.body;
+    var { balancer, min_delta } = req.body;
+    balancer = +balancer;
     console.log(balancer, min_delta);
     const future = 'BAL-PERP';
     const ResultPayload = {
