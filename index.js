@@ -12,6 +12,7 @@ app.use(express.json());
 
 app.post('/balance', async function (req, res) {
     const { balancer, min_delta } = req.body;
+    console.log(balancer, min_delta);
     const future = 'BAL-PERP';
     const ResultPayload = {
         future: future,
@@ -25,6 +26,7 @@ app.post('/balance', async function (req, res) {
         let start_position = (await ftx.getPosition(future)).size;
         ResultPayload.start_position = start_position;
         let delta = (start_position - balancer.toFixed(2)).toFixed(2);
+        console.log(`sp'${start_position}, b'${balancer}, btf'${balancer.toFixed(2)}, d'${delta}`);   
         if (+delta !== 0) {
             if (Math.abs(delta) >= min_delta) {
                 ResultPayload.amount = Math.abs(delta);
