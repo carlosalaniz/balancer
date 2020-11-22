@@ -15,9 +15,10 @@
      * In seconds
      */
     const WAIT_AFTER_GETTING_VALUE = 20;
+    const TIMEOUT = 25;
     const AUTO_BALANCER_ENDPOINT = "https://balancer.admint.io/balance";
     const MIN_DELTA = 0;
-
+    var StartTrying = 0;
     // get application values 
     var values_collected = null;
 
@@ -27,7 +28,7 @@
         } else {
             values_collected = 1;
         }
-        window.localStorage.values_collected = 1;
+        window.localStorage.values_collected = values_collected;
         document.getElementById("values_collected").innerText = values_collected;
     }
 
@@ -39,11 +40,21 @@
     }
 
     function tryFindBalanceToValue(callback) {
+        if(StartTrying === null){
+            StartTrying = +new Date();
+        }
+        if((+new Date() - StartTrying) > (TIMEOUT*1000)){
+            document.getElementById("refreshing").style.display = "block";
+            document.getElementById("refreshing").innerText = "TIMED OUT RELOADING NOW";
+        }
         var BALValueRowResult = contains(document, "a", "BAL");
         if (BALValueRowResult.length > 0) {
             var value = BALValueRowResult[0].parentNode.parentNode.querySelectorAll("span")[3].getAttribute("title")
-            callback(value);
-            return true;
+            value = value.replace(',', '');
+            document.getElementById("current_value").innerText = value;
+            if (!isNaN(value)) {
+                callback(value)
+            }
         }
         return false;
     }
@@ -66,19 +77,12 @@
     }
 
     function handleValue(value) {
-        console.info('Found value: ', value);
-        value = value.replace(',', '');
-        document.getElementById("current_value").innerText = value;
-        if (!isNaN(value)) {
-            postData(AUTO_BALANCER_ENDPOINT, { balancer: value, min_delta: MIN_DELTA })
-                .then(data => {
-                    console.info("Trade successful..."); // JSON data parsed by `data.json()` call
-                    console.info(data); // JSON data parsed by `data.json()` call
-                    document.getElementById("latest_response").innerText = JSON.stringify(data, null, 2);
-                });
-        } else {
-            console.info(value, "not a number");
-        }
+        postData(AUTO_BALANCER_ENDPOINT, { balancer: value, min_delta: MIN_DELTA })
+            .then(data => {
+                console.info("Trade successful..."); // JSON data parsed by `data.json()` call
+                console.info(data); // JSON data parsed by `data.json()` call
+                document.getElementById("latest_response").innerText = JSON.stringify(data, null, 2);
+            });
     }
 
     function noShow() {
