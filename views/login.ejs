@@ -1,0 +1,20 @@
+<%- include('base/top') -%>
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label for="email"></label>
+            <input type="email" class="form-control" id="email" aria-describedby="emailHelp"
+                placeholder="Enter email">
+
+            <label for="password"></label>
+            <input type="password" class="form-control" id="password" aria-describedby="passwordHelp"
+                placeholder="Enter password">
+        </div>
+        <button type="submit" id="login-btn" class="btn btn-primary">Login</button>
+    </div>
+</div>
+
+<%- include('base/scripts') -%>
+<script type="module" src="/scripts/login.js"></script>
+<%- include('base/bottom') -%>
