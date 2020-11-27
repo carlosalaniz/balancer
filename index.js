@@ -63,10 +63,10 @@ let sess = {
     saveUninitialized: true,
 };
 
-if (process.env.PRODUCTION) {
-    app.set('trust proxy', 1) // trust first proxy
-    sess.cookie.secure = true // serve secure cookies
-}
+// if (process.env.PRODUCTION) {
+//     app.set('trust proxy', 1) // trust first proxy
+//     sess.cookie.secure = true // serve secure cookies
+// }
 
 app.use(session(sess))
 
