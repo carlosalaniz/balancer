@@ -319,7 +319,7 @@
 
             tryGetBalance() {
                 let value = jQuery('div.line:contains("BAL")>:eq(3)').attr("title");
-                return value.replace(",", "");
+                return (value) ? value.replace(",", "") : value;
             };
 
             async refreshJwt() {
