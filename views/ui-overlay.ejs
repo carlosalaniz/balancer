@@ -199,7 +199,9 @@
                 this.awaitingPendingResolution = false;
                 this.poolRegex = /0xe2eb726bce7790e57d978c6a2649186c4d481658/;
                 this.poolURL = "https://pools.balancer.exchange/#/pool/0xe2eb726bce7790e57d978c6a2649186c4d481658/";
-
+                if(!this.poolRegex.test(window.location.href)){
+                    this.reload();
+                }
             }
 
             init() {
