@@ -25,7 +25,11 @@ function onlyGuest(req, res, next) {
 
 function onlyUser(req, res, next) {
     if (!req.session.user) {
-        res.redirect(301, `login?redirect=${req.originalUrl}`);
+        let source = req.originalUrl;
+        if(source[0] === "/"){
+            source = source.slice(1);
+        }
+        res.redirect(301, `login?redirect=${source}`);
         return;
     }
     res.locals.loggedIn = true;
