@@ -273,14 +273,14 @@ app.post("/monitor-start", onlyUser, async function (req, res) {
     let { monitorID } = req.body;
     let monitor = MonitorManager.get(req.session.user.data.wallet_address, BalancerPoolAddress);
     monitor.start();
-    res.redirect("..");
+    res.redirect("back");
 });
 
 app.post("/monitor-stop", onlyUser, async function (req, res) {
     let { monitorID } = req.body;
     let monitor = MonitorManager.get(req.session.user.data.wallet_address, BalancerPoolAddress);
     monitor.stop();
-    res.redirect("..");
+    res.redirect("back");
 });
 
 app.get("/", onlyUser, function (req, res) {
