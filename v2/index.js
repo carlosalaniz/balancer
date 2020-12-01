@@ -233,12 +233,6 @@ app.post(base + '/transactions/reject', onlyUser, async function (req, res) {
     }
 });
 
-app.get(base + '/get-injectable-code', async function (req, res) {
-    res.render('ui-overlay', {
-        service_base_url: process.env.SERVICE_BASE_URL
-    });
-});
-
 app.get(base + "/settings", onlyUser, function (req, res) {
     res.render('settings', {
         pathname: req.originalUrl,
@@ -312,8 +306,7 @@ app.get(base + "/", onlyUser, function (req, res) {
     res.render('home', {
         monitor: monitor.toObject(),
         pathname: req.originalUrl,
-        user: req.session.user,
-        service_base_url: process.env.SERVICE_BASE_URL
+        user: req.session.user
     });
 });
 
