@@ -21,17 +21,17 @@
             <span class="text-warning">STOPPED_DUE_TO_EXTERNAL_REASON - <%=monitor.reason%></span>
             <% } %>
             <%if (monitor.state  === "STOPPED") { %>
-            <form class="float-right" action="/monitor-start" method="post">
+            <form class="float-right" action="monitor-start" method="post">
               <input type="hidden" name="monitorID" value="<%=monitor.id%>" />
               <button class="btn btn-success">Start</button>
             </form>
             <% }else if(monitor.state  === "RUNNING"){ %>
-            <form class="float-right" action="/monitor-stop" method="post">
+            <form class="float-right" action="monitor-stop" method="post">
               <input name="monitorID" type="hidden" value="<%=monitor.id%>" />
               <button class=" btn btn-danger float-right">Stop</button>
             </form>
             <% }else if(monitor.state  === "STOPPED_DUE_TO_EXTERNAL_REASON"){ %>
-            <form class="float-right" action="/monitor-start" method="post">
+            <form class="float-right" action="monitor-start" method="post">
               <input name="monitorID" type="hidden" value="<%=monitor.id%>" />
               <button class=" btn btn-success float-right">Start</button>
             </form>
