@@ -4,7 +4,7 @@ $("#login-btn").click(async (e) => {
     const email = $("#email").val();
     const password = $("#password").val();
     try {
-        await postData("/do-login", {
+        await postData("do-login", {
             email, password
         });
         let params = (new URL(document.location)).searchParams;

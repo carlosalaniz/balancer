@@ -6,9 +6,9 @@ $("#register-form").submit(async (e) => {
         return reducer;
     }, {});
     try {
-        let result = await postData("/do-register", data);
+        let result = await postData("do-register", data);
         window.localStorage.jwt = result;
-        window.location.href = "/transactions";
+        window.location.href = "transactions";
     } catch (e) {
         console.error(e);
     }
