@@ -25,7 +25,7 @@ function onlyGuest(req, res, next) {
 
 function onlyUser(req, res, next) {
     if (!req.session.user) {
-        res.redirect(301, `/login?redirect=${req.originalUrl}`);
+        res.redirect(301, `login?redirect=${req.originalUrl}`);
         return;
     }
     res.locals.loggedIn = true;
@@ -75,7 +75,7 @@ app.get(base + "/login", onlyGuest,
 app.get(base + '/logout', onlyUser,
     function (req, res) {
         req.session.destroy(function (err) {
-            res.redirect(301, '/login');
+            res.redirect(301, base + '/login');
         })
     });
 
