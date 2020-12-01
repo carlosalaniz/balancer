@@ -57,14 +57,14 @@ let sess = {
 const base = "";
 app.use(session(sess))
 
-app.get(base + '/register', onlyGuest,
+app.get('/register', onlyGuest,
     async function (req, res) {
         res.render('register', {
             pathname: req.originalUrl
         });
     });
 
-app.get(base + "/login", onlyGuest,
+app.get("/login", onlyGuest,
     async function (req, res) {
         res.render('login', {
             pathname: req.originalUrl
@@ -72,14 +72,14 @@ app.get(base + "/login", onlyGuest,
     }
 );
 
-app.get(base + '/logout', onlyUser,
+app.get('/logout', onlyUser,
     function (req, res) {
         req.session.destroy(function (err) {
-            res.redirect(301, base + '/login');
+            res.redirect(301, 'login');
         })
     });
 
-app.get(base + '/test',
+app.get('/test',
     async function (req, res) {
         let user = await UserModel.findOne({ email: "carloglvn93@gmail.com" })
             .populate('transactions')
@@ -104,7 +104,7 @@ app.get(base + '/test',
         }
     });
 
-app.post(base + '/do-register', onlyGuest,
+app.post('/do-register', onlyGuest,
     async function (req, res) {
         const {
             wallet_address,
@@ -150,7 +150,7 @@ app.post(base + '/do-register', onlyGuest,
         }
     });
 
-app.post(base + "/do-login", onlyGuest,
+app.post("/do-login", onlyGuest,
     async function (req, res) {
         const {
             email,
@@ -182,7 +182,7 @@ app.post(base + "/do-login", onlyGuest,
         }
     });
 
-app.get(base + "/transactions", onlyUser, async function (req, res) {
+app.get("/transactions", onlyUser, async function (req, res) {
     const user = await UserModel.findById(req.session.user.data._id).populate("transactions").exec();
     res.render("transactions", {
         transactions: user.transactions,
@@ -190,7 +190,7 @@ app.get(base + "/transactions", onlyUser, async function (req, res) {
     });
 });
 
-app.post(base + '/transactions/approve', onlyUser, async function (req, res) {
+app.post('/transactions/approve', onlyUser, async function (req, res) {
     let { transaction_id } = req.body;
     if (transaction_id) {
         let user = await UserModel.findById(req.session.user.data._id)
@@ -208,14 +208,14 @@ app.post(base + '/transactions/approve', onlyUser, async function (req, res) {
             transaction.position_after_transaction = (await ftxClient.getPosition(transaction.market)).size;
             transaction.status = "COMPLETE"
             await transaction.save();
-            res.redirect(base + "/transactions");
+            res.redirect("transactions");
         }
     } else {
         res.status(400).json("Bad Request");
     }
 });
 
-app.post(base + '/transactions/reject', onlyUser, async function (req, res) {
+app.post('/transactions/reject', onlyUser, async function (req, res) {
     let { transaction_id } = req.body;
     if (transaction_id) {
         let user = await UserModel.findById(req.session.user.data._id)
@@ -226,21 +226,21 @@ app.post(base + '/transactions/reject', onlyUser, async function (req, res) {
             let transaction = transactionSearch[0];
             transaction.status = "REJECTED"
             await transaction.save();
-            res.redirect(base + "/transactions");
+            res.redirect("transactions");
         }
     } else {
         res.status(400).json("Bad Request");
     }
 });
 
-app.get(base + "/settings", onlyUser, function (req, res) {
+app.get("/settings", onlyUser, function (req, res) {
     res.render('settings', {
         pathname: req.originalUrl,
         trade_settings: req.session.user.data.trade_settings
     });
 });
 
-app.post(base + "/update-settings", onlyUser, async function (req, res) {
+app.post("/update-settings", onlyUser, async function (req, res) {
     let { max_delta, min_delta, refresh_rate } = req.body;
     if (max_delta || min_delta || refresh_rate) {
         let user = await UserModel.findById(req.session.user.data._id)
@@ -262,24 +262,24 @@ app.post(base + "/update-settings", onlyUser, async function (req, res) {
             data: userJson
         };
     }
-    res.redirect(base + "/settings");
+    res.redirect("settings");
 })
 
-app.post(base + "/monitor-start", onlyUser, async function (req, res) {
+app.post("/monitor-start", onlyUser, async function (req, res) {
     let { monitorID } = req.body;
     let monitor = MonitorManager.get(req.session.user.data.wallet_address, BalancerPoolAddress);
     monitor.start();
-    res.redirect(base + "/");
+    res.redirect("..");
 });
 
-app.post(base + "/monitor-stop", onlyUser, async function (req, res) {
+app.post("/monitor-stop", onlyUser, async function (req, res) {
     let { monitorID } = req.body;
     let monitor = MonitorManager.get(req.session.user.data.wallet_address, BalancerPoolAddress);
     monitor.stop();
-    res.redirect(base + "/");
+    res.redirect("..");
 });
 
-app.get(base + "/", onlyUser, function (req, res) {
+app.get("/", onlyUser, function (req, res) {
     let monitor = MonitorManager.get(req.session.user.data.wallet_address, BalancerPoolAddress);
     if (!monitor) {
         // TODO: move this to it's own function
