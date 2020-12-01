@@ -1,0 +1,552 @@
+<div id="overlay_container">
+    <style rel="stylesheet" scoped>
+        @import "https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic";
+        @import "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css";
+        @import "https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css";
+
+        .container {
+            max-width: 115rem;
+        }
+
+        #auto_balancer_top {
+            background-color: whitesmoke;
+            z-index: 999999;
+            color: #606c76;
+            left: 0;
+            right: 0;
+            position: fixed;
+        }
+
+        #auto_balancer_top h3 {
+            color: #606c76;
+        }
+
+        .no-show {
+            display: none;
+        }
+
+        .titles {
+            margin-top: 1em;
+        }
+
+        .values>div {
+            overflow-x: auto;
+        }
+
+        .actions {
+            padding: 1em 0;
+            margin-top: 1em;
+        }
+
+        .logo {
+            width: 5em;
+            height: 5em;
+        }
+
+        #auto_balancer_logs {
+            background: rgba(0, 0, 0, .8);
+            z-index: 999999;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            position: fixed;
+        }
+
+        #log_container {
+            max-height: 10em;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            margin-bottom: .5em;
+        }
+
+        .single_log .data {
+            word-break: break-all;
+        }
+
+        #auto_balancer_logs * {
+            color: rgb(0, 180, 0);
+        }
+
+        #auto_balancer_logs h3 {
+            border-bottom: 1px solid rgb(0, 180, 0);
+            padding: 10px 0;
+        }
+    </style>
+    <div id="auto_balancer_overlay">
+        <div id="auto_balancer_top" class="container">
+            <div class="float-absolute">
+                <div class="row actions">
+                    <div class="column">
+                        <div class="clearfix">
+                            <!-- Float either directions -->
+                            <div class="float-right">
+                                <button class="button button-outline" disabled id="start-stop" data-false-text="Stop"
+                                    data-true-text="Start">Start</button>
+                                <button class="button button-outline" disabled id="disable-ui"
+                                    data-false-text="Enable UI" data-true-text="Disable UI">Disable UI</button>
+                                <button class="button button-outline" disabled id="enable-logs"
+                                    data-false-text="Hide logs" data-true-text="Show logs">Show logs</button>
+                                <button id="set-user">Set user</button>
+                            </div>
+                            <div class="float-left">
+                                <a href="<%=service_base_url%>/" target="_blank">Auto balancer v2.0</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="float-right user-interface no-show">
+                    <div>
+                        <a href="#" id="force-reload">
+                            Force reload
+                        </a>
+                        |
+                        <a href="#" id="reaload_jwt">
+                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-repeat"
+                                fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
+                                <path fill-rule="evenodd"
+                                    d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
+                            </svg> Reload settings
+                        </a>
+
+                    </div>
+
+                </div>
+                <div class="row titles user-interface no-show">
+                    <div class="column column-12">
+                        <h3>User</h3>
+                    </div>
+                    <div class="column column-20">
+                        <h3>Selected Wallet</h3>
+                    </div>
+                    <div class="column column-19">
+                        <h3>Transactions</h3>
+                    </div>
+                    <div class="column column-20">
+                        <h3>Last position</h3>
+                    </div>
+                    <div class="column column-20">
+                        <h3>Delta margins</h3>
+                    </div>
+                    <div class="column column-10">
+                        <h3>Refresh</h3>
+                    </div>
+                </div>
+                <div class="row values user-interface no-show">
+                    <div class="column column-12">
+                        <blockquote>
+                            <p><em id="email"></em></p>
+                        </blockquote>
+                    </div>
+                    <div class="column column-20">
+                        <blockquote>
+                            <p><em id="wallet_address"></em></p>
+                        </blockquote>
+                    </div>
+                    <div class="column column-19">
+                        <blockquote>
+                            <p><em><a href="<%=service_base_url%>/transactions" target="_blank"
+                                        id="transactions"></a></em></p>
+                        </blockquote>
+                    </div>
+                    <div class="column column-20">
+                        <blockquote>
+                            <p><em id="last_position"></em></p>
+                        </blockquote>
+                    </div>
+                    <div class="column column-20">
+                        <blockquote>
+                            <p><em><a href="<%=service_base_url%>/settings" target="_blank" id="delta_margins"></a></em>
+                            </p>
+                        </blockquote>
+                    </div>
+                    <div class="column column-10">
+                        <blockquote>
+                            <p><em><a href="<%=service_base_url%>/settings" target="_blank"><span
+                                            id="refresh_rate"></span> s</a></em></p>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="auto_balancer_logs" class="container  no-show">
+            <div class="float-absolute-bottom">
+                <div class="row value-interface">
+                    <div class="column">
+                        <h3>LOGS</h3>
+                        <div id="log_container">
+                            <div class="row" style="display: none;" class="single_log" id="log_template">
+                                <div class="column column-40 timetamp"></div>
+                                <div class="column column-60 data"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        jQuery.noConflict();
+        class AutoBalancer {
+            start = this.init;
+            constructor() {
+                this.refreshTimeout = null;
+                this.searching = false;
+                this.awaitingPendingResolution = false;
+                this.poolRegex = /0xe2eb726bce7790e57d978c6a2649186c4d481658/;
+                this.poolURL = "https://pools.balancer.exchange/#/pool/0xe2eb726bce7790e57d978c6a2649186c4d481658/";
+                if(!this.poolRegex.test(window.location.href)){
+                    this.reload();
+                }
+            }
+
+            init() {
+                if (!this.originalHTML) {
+                    this.originalHTML = jQuery("#auto_balancer_overlay").html();
+                } else {
+                    jQuery("#auto_balancer_overlay").html(this.originalHTML);
+                }
+
+                // configuration
+                this.auto_balancer = {
+                    user: {
+                        jwt: null
+                    },
+                    settings: {
+                        showLogs: false,
+                        uiEnabled: true,
+                    },
+                    session: {
+                        logs: [],
+                        autoBalance: false
+                    }
+                }
+
+                // Inputs
+                this.emailEl = jQuery("#email");
+                this.wallet_addressEl = jQuery("#wallet_address");
+                this.transactionsEl = jQuery("#transactions");
+                this.last_positionEl = jQuery("#last_position");
+                this.delta_marginsEl = jQuery("#delta_margins");
+                this.refresh_rateEl = jQuery("#refresh_rate");
+
+                // Buttons
+                this.startStopButton = jQuery("#start-stop");
+                this.disableUIButton = jQuery("#disable-ui");
+                this.enableLogsButton = jQuery("#enable-logs");
+                this.setUserButton = jQuery("#set-user");
+                this.reload_jwtAnchor = jQuery("#reaload_jwt");
+                this.force_reloadAnchor = jQuery("#force-reload");
+
+                // Sections
+                // userInterfaceRows
+                this.userInterfaceRows = jQuery(".user-interface");
+
+                // Logs
+                this.logSection = jQuery("#auto_balancer_logs");
+
+                if (window.localStorage.auto_balancer) {
+                    this.auto_balancer = JSON.parse(window.localStorage.auto_balancer);
+                }
+
+                if (this.auto_balancer.user.jwt) {
+                    try {
+                        this.emailEl.text(this.auto_balancer.user.email);
+                        this.wallet_addressEl.text(this.auto_balancer.user.wallet_address);
+                        this.wallet_addressEl.text(this.auto_balancer.user.wallet_address);
+                        this.refresh_rateEl.text(this.auto_balancer.user.trade_settings.refresh_rate);
+                        this.delta_marginsEl.text(
+                            this.auto_balancer.user.trade_settings.min_delta + ' / ' + this.auto_balancer.user.trade_settings.max_delta
+                        )
+                        this.transactionsEl.text(this.auto_balancer.user.transaction_count || 0)
+                        this.last_positionEl.text(this.auto_balancer.user.last_position || 0)
+
+                        this.startStopButton.prop("disabled", false);
+                        this.enableLogsButton.prop("disabled", false);
+                        this.disableUIButton.prop("disabled", false);
+                        this.userInterfaceRows.removeClass("no-show");
+                        if (!this.auto_balancer.settings.uiEnabled) {
+                            jQuery('body').children().not('#overlay_container').hide();
+                            this.toggleButtonText(this.disableUIButton, false);
+                        } else {
+                            jQuery('body').children().not('#overlay_container').show();
+                            this.toggleButtonText(this.disableUIButton, true);
+                        }
+
+                        if (!this.auto_balancer.session.autoBalance) {
+                            this.stopAutoBalance();
+                            this.toggleButtonText(this.startStopButton, true);
+                        } else {
+                            this.autoBalance();
+                            this.toggleButtonText(this.startStopButton, false);
+                        }
+
+                        if (this.auto_balancer.settings.showLogs) {
+                            this.renderLogs();
+                            this.logSection.removeClass("no-show");
+                        } else {
+                            this.logSection.addClass("no-show");
+                        }
+
+                    } catch (e) {
+                        if (e instanceof TypeError) {
+                            this.resetAutoBalancer();
+                            this.init();
+                        } else {
+                            console.error(e);
+                        }
+                    }
+                }
+
+                this.setUserButton.on("click", () => { this.promptForJWT() });
+                this.disableUIButton.on("click", () => { this.toggleUI() });
+                this.startStopButton.on("click", () => { this.toggleInterval() });
+                this.enableLogsButton.on("click", () => { this.toggleLogs() });
+                this.reload_jwtAnchor.on("click", () => { this.refreshJwt() });
+                this.force_reloadAnchor.on("click", () => { this.reload() });
+
+                jQuery("#auto_balancer_overlay a").on("click", function () {
+
+                });
+            }
+
+            reload() {
+                window.location.href = this.poolURL;
+                location.reload();
+            }
+
+            tryGetBalance() {
+                let value = jQuery('div.line:contains("BAL")>:eq(3)').attr("title");
+                return (value) ? value.replace(",", "") : value;
+            };
+
+            async refreshJwt() {
+                window.location.href = this.poolURL;
+                let request = new Request("<%=service_base_url%>/refresh-jwt", {
+                    method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                    mode: 'cors', // no-cors, *cors, same-origin
+                    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.auto_balancer.user.jwt}`
+                    }
+                });
+                let response = await fetch(request);
+                let newtoken = await response.json();
+                this.resetAutoBalancer();
+                await this.setUser(newtoken);
+                alert("Token Refreshed")
+                this.init();
+            }
+
+            toggleInterval() {
+                this.auto_balancer.session.autoBalance = !this.auto_balancer.session.autoBalance;
+                this.saveAutoBalancer();
+                this.init();
+            }
+
+            renderLogs() {
+                jQuery("#log_container single_log").not("#log_template").remove();
+                this.auto_balancer.session.logs.forEach(log => this.appendLog(log));
+            }
+
+            appendLog(log) {
+                let newLog = jQuery("#log_template").clone();
+                newLog.find(".timetamp").text(new Date(log[0]).toLocaleString());
+                newLog.find(".data").text(log[1]);
+                newLog.removeAttr("id");
+                newLog.show();
+                jQuery("#log_container").prepend(newLog);
+            }
+
+            resetAutoBalancer() {
+                delete window.localStorage.auto_balancer;
+            }
+
+            saveAutoBalancer() {
+                if (this.auto_balancer.user.jwt) {
+                    window.localStorage.auto_balancer = JSON.stringify(this.auto_balancer);
+                }
+            }
+
+            toggleButtonText(el, flag) {
+                let trueText = el.data("true-text");
+                if (flag && trueText) {
+                    el.text(trueText);
+                } else if (!flag) {
+                    el.data("true-text", el.text());
+                    el.text(el.data("false-text"));
+                }
+            }
+
+            async promptForJWT() {
+                let jwt = prompt("JWT TOKEN");
+                if (!jwt || !await this.setUser(jwt)) {
+                    this.resetAutoBalancer()
+                }
+                this.init()
+            }
+
+            async validateToken(jwt) {
+                //todo: get this to work properly 
+                return true;
+            }
+
+            async setUser(jwt) {
+                if (await this.validateToken(jwt)) {
+                    let userData = this.parseJwt(jwt);
+                    this.auto_balancer.user = {
+                        ...userData,
+                        jwt: jwt
+                    }
+                    this.saveAutoBalancer();
+                    return true;
+                }
+                return false;
+            }
+
+            toggleUI() {
+                this.auto_balancer.settings.uiEnabled = !this.auto_balancer.settings.uiEnabled;
+                this.saveAutoBalancer();
+                this.init();
+            }
+
+            parseJwt(token) {
+                var base64Url = token.split('.')[1];
+                var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                var jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                return JSON.parse(jsonPayload);
+            };
+
+            log(data) {
+                let log = [+new Date(), data];
+                this.auto_balancer.session.logs.push(log);
+                this.appendLog(log);
+                this.saveAutoBalancer();
+            }
+
+            toggleLogs() {
+                this.auto_balancer.settings.showLogs = !this.auto_balancer.settings.showLogs;
+                this.saveAutoBalancer();
+                this.init();
+            }
+
+            validateBalance(value) {
+                return value && !isNaN(value);
+            }
+
+            stopAutoBalance() {
+                if (this.refreshTimeout) {
+                    this.log("Refresh timer stopped: ");
+                    clearTimeout(this.refreshTimeout);
+                    this.refreshTimeout = null;
+                }
+            }
+
+            async awaitPendingResolve(transaction, skip) {
+                if (!this.awaitingPendingResolution || skip) {
+                    if (!skip) {
+                        this.log("Waiting for pending transaction to be resolved...");
+                    }
+                    this.awaitingPendingResolution = true;
+                    let request = new Request("<%=service_base_url%>/transaction-details", {
+                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                        mode: 'cors', // no-cors, *cors, same-origin
+                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.auto_balancer.user.jwt}`
+                        },
+                        body: JSON.stringify({ transaction_id: transaction._id })
+                    });
+                    let response = await fetch(request);
+                    let responseTransaction = await response.json();
+
+                    switch (responseTransaction.status) {
+                        case "PENDING":
+                            setTimeout(() => {
+                                this.awaitPendingResolve(responseTransaction, true);
+                            }, 1000)
+                            break;
+                        case "COMPLETE":
+                            this.startStopButton.click();
+                        case "REJECTED":
+                            this.log('Transactions resolved. New status: ' + responseTransaction.status);
+                            this.awaitingPendingResolution = false;
+                            break;
+                    }
+                }
+            }
+
+            async autoBalance() {
+                if (!this.searching) {
+                    this.searching = true;
+                    let balance = await (new Promise((resolve, reject) => {
+                        let balance = this.tryGetBalance();
+                        if (this.validateBalance(balance)) {
+                            resolve(balance);
+                        } else {
+                            let interval = setInterval(() => {
+                                balance = this.tryGetBalance();
+                                if (this.validateBalance(balance)) {
+                                    clearInterval(interval);
+                                    resolve(balance);
+                                }
+                            }, 1000)
+                        }
+                    }));
+                    this.log("Balance adquired: " + balance);
+                    let request = new Request("<%=service_base_url%>/balance", {
+                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                        mode: 'cors', // no-cors, *cors, same-origin
+                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.auto_balancer.user.jwt}`
+                        },
+                        body: JSON.stringify({ balanceTo: balance })
+                    });
+                    let response = await fetch(request);
+                    let body = await response.json();
+
+                    if (body.transaction) {
+                        this.log("Transaction " + body.transaction.status + ": " + JSON.stringify(body.transaction));
+                        this.resetAutoBalancer();
+                        await this.setUser(body.jwt);
+                        this.init();
+                    } else {
+                        this.log("No change in balance, no transaction made.");
+                    }
+                    try {
+                        if (!body.transaction || body.transaction.status != "PENDING") {
+                            this.log("Refreshing page in " + this.auto_balancer.user.trade_settings.refresh_rate + " seconds.");
+                            this.refreshTimeout = setTimeout(() => {
+                                this.reload()
+                            }, this.auto_balancer.user.trade_settings.refresh_rate * 1000);
+                        } else if (body.transaction && body.transaction.status === "PENDING") {
+                            // Is pending
+                            this.auto_balancer.session.autoBalance = false;
+                            this.toggleButtonText(this.startStopButton, true);
+                            this.saveAutoBalancer();
+                            this.awaitPendingResolve(body.transaction);
+                            this.searching = false;
+                        }
+                    } catch (error) {
+                        debugger;
+                        this.log("Error: " + JSON.stringify(error));
+                    }
+                }
+            }
+        }
+
+        let auto_balancer = new AutoBalancer();
+        auto_balancer.start();
+    </script>
+</div>
