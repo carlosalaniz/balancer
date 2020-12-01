@@ -294,7 +294,7 @@ app.get("/", onlyUser, function (req, res) {
             async (newValue, monitorInstance) => {
                 let transaction = await balanceFunction(req.session.user.data._id, newValue)
                 let monitor = MonitorManager.get(...monitorInstance.getId().split(','));
-                console.log(newValue, monitor.toObject().lastUpdatedAt.toLocaleString());
+                // console.log(newValue, monitor.toObject().lastUpdatedAt.toLocaleString());
                 switch ((transaction) ? transaction.status : transaction) {
                     case "PENDING":
                         var reason = "Tansaction Pending";
