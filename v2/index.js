@@ -26,7 +26,7 @@ function onlyGuest(req, res, next) {
 function onlyUser(req, res, next) {
     if (!req.session.user) {
         let source = req.originalUrl;
-        if(source[0] === "/"){
+        if (source[0] === "/") {
             source = source.slice(1);
         }
         res.redirect(301, `login?redirect=${source}`);
@@ -270,47 +270,58 @@ app.post("/update-settings", onlyUser, async function (req, res) {
 })
 
 app.post("/monitor-start", onlyUser, async function (req, res) {
-    let { monitorID } = req.body;
     let monitor = MonitorManager.get(req.session.user.data.wallet_address, BalancerPoolAddress);
-    monitor.start();
+    if (monitor.state() !== BPoolMonitorManager.MONITORSTATES.RUNNING) {
+        let user = await UserModel.findById(req.session.user.data._id);
+        monitor.setRefreshTime(user.trade_settings.refresh_rate)
+        monitor.start();
+    }
     res.redirect("back");
 });
 
 app.post("/monitor-stop", onlyUser, async function (req, res) {
     let { monitorID } = req.body;
     let monitor = MonitorManager.get(req.session.user.data.wallet_address, BalancerPoolAddress);
-    monitor.stop();
+    if (monitor.state() === BPoolMonitorManager.MONITORSTATES.RUNNING) {
+        monitor.stop();
+    }
     res.redirect("back");
 });
 
-app.get("/", onlyUser, function (req, res) {
+
+
+var handleNewValue = async function (user_id, newValue, monitorInstance) {
+    let transaction = await balanceFunction(user_id, newValue)
+    let monitor = MonitorManager.get(...monitorInstance.getId().split(','));
+    // console.log(newValue, monitor.toObject().lastUpdatedAt.toLocaleString());
+    switch ((transaction) ? transaction.status : transaction) {
+        case "PENDING":
+            var reason = "Tansaction Pending";
+        case "REJECTED":
+            monitor.stop(typeof reason !== 'undefined' ? reason : undefined);
+            break;
+        default:
+        case "COMPLETE":
+            break;
+    }
+}
+
+app.get("/", onlyUser, async function (req, res) {
     let monitor = MonitorManager.get(req.session.user.data.wallet_address, BalancerPoolAddress);
+    let user = await UserModel.findById(req.session.user.data._id);
     if (!monitor) {
         // TODO: move this to it's own function
         monitor = MonitorManager.create(
             req.session.user.data.wallet_address,
             BalancerPoolAddress,
-            req.session.user.data.trade_settings.refresh_rate,
-            async (newValue, monitorInstance) => {
-                let transaction = await balanceFunction(req.session.user.data._id, newValue)
-                let monitor = MonitorManager.get(...monitorInstance.getId().split(','));
-                // console.log(newValue, monitor.toObject().lastUpdatedAt.toLocaleString());
-                switch ((transaction) ? transaction.status : transaction) {
-                    case "PENDING":
-                        var reason = "Tansaction Pending";
-                    case "REJECTED":
-                        monitor.stop(typeof reason !== 'undefined' ? reason : undefined);
-                        break;
-                    default:
-                    case "COMPLETE":
-                        break;
-                }
-            });
+            user.trade_settings.refresh_rate,
+            async (newValue, monitorInstance) => await handleNewValue(user._id, newValue, monitorInstance)
+        );
     }
     res.render('home', {
         monitor: monitor.toObject(),
         pathname: req.originalUrl,
-        user: req.session.user
+        user: user.toSafeJSON()
     });
 });
 

@@ -19,8 +19,9 @@ class BPoolMonitor {
         this.stopSignal = false;
         this.waitingForValue = false;
 
-        this.startedAt = new Date();
-        this.lastUpdatedAt = new Date();
+        this.startedAt = null;
+        this.lastUpdatedAt = null;
+        this.lastValue = null;
     }
 
     async getBpoolBalance() {
@@ -49,6 +50,7 @@ class BPoolMonitor {
     async cycle() {
         let newBpoolValue = await this.getBpoolBalance();
         this.lastUpdatedAt = new Date();
+        this.lastValue = newBpoolValue;
         if (this.onNewValue.constructor.name === "AsyncFunction") {
             await this.onNewValue(newBpoolValue, this);
         } else {
@@ -61,6 +63,7 @@ class BPoolMonitor {
     }
 
     start() {
+        this.startedAt =new Date();
         this.stopSignal = false;
         this.cycle();
         return +new Date();
@@ -149,13 +152,18 @@ class BPoolMonitorManager {
                         monitor: new BPoolMonitor(walletAddress, poolAddress, valueRefreshTime, onNewValue)
                     };
                 },
+                setRefreshTime(newTime) {
+                    parent.ActiveMonitors[monitorId].monitor.valueRefreshTime = newTime;
+                },
                 toObject: function () {
                     let monitor = parent.ActiveMonitors[monitorId].monitor;
                     return {
                         state: this.state(),
                         reason: parent.ActiveMonitors[monitorId].reason,
                         id: monitorId,
+                        refreshTime: monitor.valueRefreshTime,
                         startedAt: monitor.startedAt,
+                        lastValue: monitor.lastValue,
                         lastUpdatedAt: monitor.lastUpdatedAt,
                     }
                 }

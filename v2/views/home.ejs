@@ -1,4 +1,5 @@
 <%- include('base/top') -%>
+<script src="https://momentjs.com/downloads/moment.min.js"></script>
 <% 
   let jwt = user.jwt;
   let scopedUser = {...user};
@@ -19,7 +20,8 @@
             <span class="text-success">RUNNING</span>
             <% }else if(monitor.state  === "STOPPED_DUE_TO_EXTERNAL_REASON"){ %>
             <span class="text-warning">STOPPED_DUE_TO_EXTERNAL_REASON - <%=monitor.reason%></span>
-            <% } %>
+            <% } %> |
+            <span class="font-weight-bold">Started at: </span><span><%=monitor.startedAt && monitor.startedAt.toLocaleString()%> </span>
             <%if (monitor.state  === "STOPPED") { %>
             <form class="float-right" action="monitor-start" method="post">
               <input type="hidden" name="monitorID" value="<%=monitor.id%>" />
@@ -40,9 +42,14 @@
         </div>
         <div class="row">
           <div class="col">
-            <span class="font-weight-bold">Started at: </span><span><%=monitor.startedAt.toLocaleString()%> </span>
-            <span class="font-weight-bold">Last updated at:
-            </span><span><%=monitor.lastUpdatedAt.toLocaleString()%></span>
+            <span class="font-weight-bold">Last updated:
+            </span><span><%=((new Date() - monitor.lastUpdatedAt)/1000).toFixed(2)%>s</span>
+            |
+            <span class="font-weight-bold">Last value observed:
+            </span><span><%=monitor.lastValue && monitor.lastValue.toFixed(2)%></span>
+            |
+            <span class="font-weight-bold">Last position:
+            </span><span><%=scopedUser.last_position.toFixed(2)%></span>
           </div>
         </div>
 
