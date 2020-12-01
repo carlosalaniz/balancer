@@ -9,7 +9,7 @@ $("#login-btn").click(async (e) => {
         });
         let params = (new URL(document.location)).searchParams;
         let redirect = params.get("redirect");
-        window.location.href = window.location.origin + (redirect !== null ? redirect : "");
+        window.location.href = window.location.origin + (redirect !== null ? redirect : window.location.href.split("/").slice(3,-1).join(''));
     } catch (err) {
         console.error(err);
     }
