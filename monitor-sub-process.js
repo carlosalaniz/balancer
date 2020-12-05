@@ -1,5 +1,4 @@
 
-require("dotenv").config("./.env");
 if (!process.send) {
     process.exit("This process is meant to be used as a fork, it cannot be ran as a standalone program");
 }
