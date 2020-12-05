@@ -266,7 +266,7 @@ connectToDbAsync().then(database => {
     })
 
 
-    app.use(app_routing_prefix, router);
+    app.use("/", router);
     app.locals = {
         site: {
             app_routing_prefix: (app_routing_prefix.length > 1) ? app_routing_prefix : ""

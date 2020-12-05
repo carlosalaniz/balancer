@@ -30,7 +30,6 @@ require("./database").connectToDbAsync().then(async (database) => {
 
 
     async function onNewValueAdquired(value, instance) {
-        console.log(value);
         let transaction = await onNewValue(user_id, +value, monitorConfiguration.market,
             monitorConfiguration._id,
             UserModel,
