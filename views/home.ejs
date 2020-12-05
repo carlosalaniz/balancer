@@ -1,30 +1,123 @@
 <%- include('base/top') -%>
-<% 
-  let jwt = user.jwt;
-  let scopedUser = {...user};
-  delete scopedUser.jwt;
-%>
+<script src="https://momentjs.com/downloads/moment.min.js"></script>
+<!-- <pre><%=JSON.stringify(monitors,null,2)%></pre> -->
 
 <div class="row">
   <div class="col">
     <div>
-      <h2>JWT</h2>
-      <blockquote class="blockquote bg-light p-3 text-break">
-        <%=jwt%>
-      </blockquote>
+      <div class="float-right">
+        <a href="<%=`${locals.site.app_routing_prefix}/monitor`%>">
+          <button class="btn btn-success">Create monitor</button>
+        </a>
+      </div>
+      <h2> Monitors </h2>
+      <hr>
     </div>
+    <% monitors.forEach(monitor=>{%>
     <div>
-      <h2>Tamper monkey script</h2>
-      <blockquote class="blockquote bg-light p-3 text-break">
-        <%- include('tamper') -%>
+      <h3>Pool <small><a target="_blank"
+            href="https://pools.balancer.exchange/#/pool/<%=monitor.pool_contract_address%>/">
+            <%=monitor.pool_contract_address%>
+          </a>
+        </small>
+      </h3>
+      </small>
+      </h2>
+      <blockquote class="blockquote bg-light p-3">
+        <div class="row">
+
+          <div class="col-10">
+            <div class="row">
+              <div class="col">
+                <span class="font-weight-bold">State:</span>
+                <%if (monitor.status  === "STOPPED") { %>
+                <span class="text-danger">STOPPED</span>
+                <% }else if(monitor.status  === "RUNNING"){ %>
+                <span class="text-success">RUNNING</span>
+                <% }else if(monitor.status  === "STOPPED_DUE_TO_EXTERNAL_REASON"){ %>
+                <span class="text-warning">STOPPED_DUE_TO_EXTERNAL_REASON - <%=monitor.reason%></span>
+                <% } %>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <div>
+                  <span class="font-weight-bold">Last updated:
+                  </span><span><%=(monitor.lastUpdatedAt)?((new Date() - new Date(monitor.lastUpdatedAt))/1000).toFixed(2)+"s" : ""%></span>
+                </div>
+
+                <div>
+                  <span class="font-weight-bold">Last value observed:
+                  </span><span><%=monitor.lastValue && monitor.lastValue.toFixed(2)%></span>
+                </div>
+                <div>
+                  <span class="font-weight-bold">Token: </span>
+                  <small><a target="_blank" href="https://etherscan.io/address/<%=monitor.token_address%>/">
+                      <%=monitor.token_address%>
+                    </a></small>
+                </div>
+                <div>
+                  <span class="font-weight-bold">Wallet: </span>
+                  <small><a target="_blank" href="https://etherscan.io/address/<%=monitor.wallet_address%>/">
+                      <%=monitor.wallet_address%>
+                    </a></small>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div>
+                  <span class="font-weight-bold">Refresh rate:
+                  </span><span><%=monitor.refresh_rate%>s</span>
+                </div>
+                <div>
+                  <span class="font-weight-bold">Market:</span>
+                  <span><%=monitor.market%></span>
+                </div>
+                <div>
+                  <span class="font-weight-bold">Min delta:</span>
+                  <span><%=monitor.min_delta%></span>
+                </div>
+                <div>
+                  <span class="font-weight-bold">Max delta:</span>
+                  <span><%=monitor.max_delta%></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-2">
+            <!-- Buttons -->
+            <div class="float-right">
+              <a href="<%=locals.site.app_routing_prefix%>/monitor/<%=monitor.id%>/transactions">
+                <button class="btn btn-info  mb-2 btn-block">Transactions</button>
+              </a>
+              <%if (monitor.status  === "STOPPED") { %>
+              <form action="<%=locals.site.app_routing_prefix%>/monitor/<%=monitor.id%>/start" method="post">
+                <button class="btn btn-success btn-block">Start</button>
+              </form>
+              <% }else if(monitor.status  === "RUNNING"){ %>
+              <form action="<%=locals.site.app_routing_prefix%>/monitor/<%=monitor.id%>/stop" method="post">
+                <button class=" btn btn-danger  btn-block">Stop</button>
+              </form>
+              <% }else if(monitor.status  === "STOPPED_DUE_TO_EXTERNAL_REASON"){ %>
+              <form action="<%=locals.site.app_routing_prefix%>/monitor/<%=monitor.id%>/start" method="post">
+                <button class=" btn btn-success  btn-block">Start</button>
+              </form>
+              <% } %>
+              <form action="<%=locals.site.app_routing_prefix%>/monitor/<%=monitor.id%>/remove"
+                onSubmit="return confirm('Are you sure?');"
+                method="post">
+                <button class="btn btn-danger  mt-2 btn-block">Remove</button>
+              </form>
+            </div>
+            <!-- End buttons -->
+          </div>
+        </div>
+
+
       </blockquote>
     </div>
-    <div>
-      <h2>Current user configuration</h2>
-      <blockquote class="blockquote bg-light p-3 text-break">
-        <pre><%=JSON.stringify(scopedUser, null, 2);%></pre>
-      </blockquote>
-    </div>
+    <%})%>
+
   </div>
 </div>
 

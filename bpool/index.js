@@ -1,76 +1,110 @@
 const Web3 = require('web3');
-const wait = function (time) {
-    return new Promise((resolutionFunc, rejectionFunc) => {
-        setTimeout(() => {
-            resolutionFunc();
-        }, time * 1000)
-    })
-}
+const wait = require("../wait");
+const Bpool = require("./BPool.json")
+
 
 class BPoolMonitor {
-    constructor(walletAddress, poolAddress, valueRefreshTime, onNewValue) {
-        this.Bpool = require("./BPool.json")
+    static MONITORSTATUS = {
+        STOPPED_DUE_TO_EXTERNAL_REASON: 'STOPPED_DUE_TO_EXTERNAL_REASON',
+        STOPPED: 'STOPPED',
+        RUNNING: 'RUNNING',
+    }
+
+    constructor(
+        walletAddress,
+        poolContractAddress,
+        tokenAddress,
+        valueRefreshTime,
+        onNewValue,
+        metadata
+    ) {
+        this.web3 = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_PROVIDER));
+        this.smartContract = new this.web3.eth.Contract(Bpool.abi, poolContractAddress);
+
+        
         this.walletAddress = walletAddress;
-        this.poolAddress = poolAddress;
+        this.poolAddress = poolContractAddress;
+        this.tokenAddress = tokenAddress;
+
         this.valueRefreshTime = valueRefreshTime;
         this.onNewValue = onNewValue;
-        this.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/eeb133ef92054b6b972655a777493eca"));
+        this.poolContractAddress = poolContractAddress;
+        this.metadata = metadata;
+        
+        this.watchTokenIsValid = new Promise((resolve, reject) => {
+            this.smartContract.methods.getCurrentTokens().call().then(poolTokens => {
+                if (!poolTokens.includes(this.tokenAddress)) {
+                    reject(`Token ${this.tokenAddress} is not valid for pool ${this.poolContractAddress}`);
+                }
+                resolve();
+            });
+        });
 
-        this.stopSignal = false;
-        this.waitingForValue = false;
-
-        this.startedAt = null;
-        this.lastUpdatedAt = null;
-        this.lastValue = null;
+        // State management
+        this.state = {
+            startedAt: null,
+            lastUpdatedAt: null,
+            lastValue: null,
+            status: BPoolMonitor.MONITORSTATUS.STOPPED,
+            reason: undefined,
+            waitingForValue: false,
+            stopSignal: false
+        }
     }
 
     async getBpoolBalance() {
         try {
-            var contract = new this.web3.eth.Contract(this.Bpool.abi, "0xe2eb726bce7790e57d978c6a2649186c4d481658");
-
+            await this.watchTokenIsValid;
             // Coin/Pool Address
-            let poolTokenBalance = +await contract.methods.getBalance(this.poolAddress).call();
-
+            let poolTokenBalance = +await this.smartContract.methods.getBalance(this.tokenAddress).call();
 
             // Total Bpt supply
-            let totalShares = +await contract.methods.totalSupply().call();
+            let totalShares = +await this.smartContract.methods.totalSupply().call();
 
             // Wallet Balance 
-            let walletBalance = +await contract.methods.balanceOf(this.walletAddress).call();
+            let walletBalance = +await this.smartContract.methods.balanceOf(this.walletAddress).call();
 
             let myBalance = (poolTokenBalance / totalShares) * walletBalance;
 
-            return myBalance / Math.pow(10, await contract.methods.decimals().call());
-
+            return myBalance / Math.pow(10, await this.smartContract.methods.decimals().call());
         } catch (e) {
             console.error(e);
+            this.stop(e);
         }
     }
 
     async cycle() {
         let newBpoolValue = await this.getBpoolBalance();
-        this.lastUpdatedAt = new Date();
-        this.lastValue = newBpoolValue;
-        if (this.onNewValue.constructor.name === "AsyncFunction") {
-            await this.onNewValue(newBpoolValue, this);
-        } else {
-            this.onNewValue(newBpoolValue, this);
-        }
-        await wait(this.valueRefreshTime);
-        if (!this.stopSignal && !this.waitingForValue) {
-            await this.cycle();
+        if(newBpoolValue){
+            this.state.lastUpdatedAt = new Date();
+            this.state.lastValue = newBpoolValue;
+            if (this.onNewValue.constructor.name === "AsyncFunction") {
+                await this.onNewValue(newBpoolValue, this);
+            } else {
+                this.onNewValue(newBpoolValue, this);
+            }
+            if (!this.state.stopSignal && !this.state.waitingForValue) {
+                await wait(this.valueRefreshTime);
+                await this.cycle();
+            }
         }
     }
 
     start() {
-        this.startedAt =new Date();
-        this.stopSignal = false;
+        this.state.startedAt = new Date();
+        this.state.stopSignal = false;
+        this.state.status = BPoolMonitor.MONITORSTATUS.RUNNING;
         this.cycle();
-        return +new Date();
     }
 
-    stop() {
-        this.stopSignal = true;
+    stop(reason) {
+        if (reason) {
+            this.state.reason = reason;
+            this.state.status = BPoolMonitor.MONITORSTATUS.STOPPED_DUE_TO_EXTERNAL_REASON;
+        } else {
+            this.state.status = BPoolMonitor.MONITORSTATUS.STOPPED;
+        }
+        this.state.stopSignal = true;
     }
 
     static id(walletAddress, poolAddress) {
@@ -80,7 +114,32 @@ class BPoolMonitor {
     getId() {
         return BPoolMonitor.id(this.walletAddress, this.poolAddress);
     }
+
+    toObject() {
+        return {
+            state: this.state,
+            metadata: this.metadata,
+            poolAddress: this.poolAddress,
+            walletAddress: this.walletAddress
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class BPoolMonitorManager {
     static MONITORSTATES = {
@@ -175,7 +234,7 @@ class BPoolMonitorManager {
 }
 
 module.exports = {
-    BPoolMonitorManager
+    BPoolMonitorManager, BPoolMonitor
 }
 
 

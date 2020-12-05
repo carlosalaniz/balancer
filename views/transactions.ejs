@@ -23,7 +23,7 @@
         <% transactions.forEach(t=>{ %>
         <tr>
             <th scope="row"><%= new Date(t.createdAt).toLocaleString() %> </th>
-            <td><%= t.amount %> </td>
+            <td><%= Math.abs(+t.amount) %> </td>
             <td><%= t.side %> </td>
             <td><%= t.market %> </td>
             <td><%= t.position_before_transaction %> </td>
@@ -35,11 +35,11 @@
             <%} else if(t.status === "PENDING") {%>
             <td class="text-warning"><%= t.status %> </td>
             <td class="action">
-                <form action="/transactions/approve" method="POST">
+                <form action="<%=locals.site.app_routing_prefix%>/monitor/<%=t._monitor%>/transactions/<%=t._id%>/approve" method="POST">
                     <input type="hidden" value="<%=t._id%>" name="transaction_id" />
                     <button class="btn btn-sm btn-success btn-block">Approve</button>
                 </form>
-                <form action="/transactions/reject" method="POST">
+                <form action="<%=locals.site.app_routing_prefix%>/monitor/<%=t._monitor%>/transactions/<%=t._id%>/reject" method="POST">
                     <input type="hidden" value="<%=t._id%>" name="transaction_id" />
                     <button class="btn btn-sm btn-danger btn-block">Reject</button>
                 </form>

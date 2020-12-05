@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 const TransactionModel = mongoose.model('Transaction',
     new Schema({
         _transactor: { type: Schema.Types.ObjectId, ref: 'User' },
+        _monitor: { type: Schema.Types.ObjectId, ref: 'User.monitors' },
         amount: "number",
         side: {
             type: "string",
@@ -23,12 +24,6 @@ const TransactionModel = mongoose.model('Transaction',
 
 // Users
 var UserSchema = new Schema({
-    wallet_address: {
-        type: 'string',
-        index: true,
-        unique: true,
-        lowercase: true
-    },
     email: {
         type: 'string',
         index: true,
@@ -36,27 +31,38 @@ var UserSchema = new Schema({
         lowercase: true
     },
     password: 'string',
-    last_position: 'number',
-    trade_settings: {
-        ftx: {
-            type: {
-                FTX_KEY: "string",
-                FTX_SECRET: "string"
+    monitors: [{
+        last_position: 'number',
+        pool_contract_address: "string",
+        token_address:'string',
+        wallet_address: {
+            type: 'string',
+            index: true,
+        },
+        market: "string",
+        trade_settings: {
+            min_delta: {
+                type: 'number',
+                default: 0.01
             },
-            required: true
+            max_delta: {
+                type: 'number',
+            },
+            refresh_rate: {
+                type: 'number',
+            },
+            ftx: {
+                type: {
+                    FTX_KEY: "string",
+                    FTX_SECRET: "string"
+                },
+                required: true
+            }
         },
-        min_delta: {
-            type: 'number',
-            default: 0.01
-        },
-        max_delta: {
-            type: 'number',
-        },
-        refresh_rate: {
-            type: 'number',
-        }
-    },
-    transactions: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }]
+        state: "string",
+        reason:"string",
+        transactions: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }]
+    }],
 }, { timestamps: true });
 
 UserSchema.methods.toSafeJSON = function () {
