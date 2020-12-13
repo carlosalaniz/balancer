@@ -82,28 +82,31 @@ var getPoolWalletMetadata = async (
     }
 };
 
-connectToDbAsync()
-.then(async db => {
-    cron.schedule('00 00 00,12 * * *', async() => {
-        let date = new Date();
-            console.log("checking..." + date.toLocaleDateString() + " " + date.toLocaleTimeString())
-            let users = await db.models.User.find().exec();
-            users.forEach(async userModel => {
-                let user = userModel.toObject();
-                user.monitors && user.monitors.forEach(async m => {
-                    let metadata = await getPoolWalletMetadata(
-                        m.pool_contract_address,
-                        m.wallet_address,
-                        ["USD"]
-                    );
-                    let ftx = new FTXExchange(m.trade_settings.ftx.FTX_KEY, m.trade_settings.ftx.FTX_SECRET);
-                    let open_postion = await ftx.getPosition(m.market);
-                    metadata.open_postion = open_postion.size;
-                    let log = new db.models.BalanceLog(metadata);
-                    await log.save();
-                })
-            })
+async function check() {
+    let date = new Date();
+    console.log("checking..." + date.toLocaleDateString() + " " + date.toLocaleTimeString())
+    let users = await db.models.User.find().exec();
+    users.forEach(async userModel => {
+        let user = userModel.toObject();
+        user.monitors && user.monitors.forEach(async m => {
+            let metadata = await getPoolWalletMetadata(
+                m.pool_contract_address,
+                m.wallet_address,
+                ["USD"]
+            );
+            let ftx = new FTXExchange(m.trade_settings.ftx.FTX_KEY, m.trade_settings.ftx.FTX_SECRET);
+            let open_postion = await ftx.getPosition(m.market);
+            metadata.open_postion = open_postion.size;
+            let log = new db.models.BalanceLog(metadata);
+            await log.save();
         })
+    })
+}
+
+connectToDbAsync()
+    .then(async db => {
+        check();
+        cron.schedule('00 00 00,12 * * *', check())
     });
 
 
