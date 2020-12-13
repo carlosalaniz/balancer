@@ -27,19 +27,19 @@ const BalanceLogModel = mongoose.model("BalanceLog",
         wallet_address: "string",
         currencies: ["string"],
         recorded_at: "number",
-        open_postion:"number",
+        open_postion: "number",
         tokens: [
             {
-                token_address:"string",
-                stable:"string",
-                token_name:"string",
-                token_balance:"number",
-                exchange_rates:[
+                token_address: "string",
+                stable: "string",
+                token_name: "string",
+                token_balance: "number",
+                exchange_rates: [
                     {
-                        exchange_name:"string",
-                        rates:[
+                        exchange_name: "string",
+                        rates: [
                             {
-                                currency:"string",
+                                currency: "string",
                                 rate: "number"
                             }
                         ]
@@ -60,9 +60,10 @@ var UserSchema = new Schema({
     },
     password: 'string',
     monitors: [{
+        infura_key: "string",
         last_position: 'number',
         pool_contract_address: "string",
-        token_address:'string',
+        token_address: 'string',
         wallet_address: {
             type: 'string',
             index: true,
@@ -88,7 +89,7 @@ var UserSchema = new Schema({
             }
         },
         state: "string",
-        reason:"string",
+        reason: "string",
         transactions: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }]
     }],
 }, { timestamps: true });

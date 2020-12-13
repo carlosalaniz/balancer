@@ -11,6 +11,7 @@ class BPoolMonitor {
     }
 
     constructor(
+        infuraKey,
         walletAddress,
         poolContractAddress,
         tokenAddress,
@@ -18,10 +19,10 @@ class BPoolMonitor {
         onNewValue,
         metadata
     ) {
-        this.web3 = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_PROVIDER));
+        this.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/" + infuraKey));
         this.smartContract = new this.web3.eth.Contract(Bpool.abi, poolContractAddress);
 
-        
+
         this.walletAddress = walletAddress;
         this.poolAddress = poolContractAddress;
         this.tokenAddress = tokenAddress;
@@ -30,7 +31,7 @@ class BPoolMonitor {
         this.onNewValue = onNewValue;
         this.poolContractAddress = poolContractAddress;
         this.metadata = metadata;
-        
+
         this.watchTokenIsValid = new Promise((resolve, reject) => {
             this.smartContract.methods.getCurrentTokens().call().then(poolTokens => {
                 if (!poolTokens.includes(this.tokenAddress)) {
@@ -75,7 +76,7 @@ class BPoolMonitor {
 
     async cycle() {
         let newBpoolValue = await this.getBpoolBalance();
-        if(newBpoolValue){
+        if (newBpoolValue) {
             this.state.lastUpdatedAt = new Date();
             this.state.lastValue = newBpoolValue;
             if (this.onNewValue.constructor.name === "AsyncFunction") {

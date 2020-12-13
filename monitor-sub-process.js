@@ -56,6 +56,7 @@ require("./database").connectToDbAsync().then(async (database) => {
 
     // instanciate monitor
     const monitor = new BPoolMonitor(
+        monitorConfiguration.infuraKey,
         monitorConfiguration.wallet_address,
         monitorConfiguration.pool_contract_address,
         monitorConfiguration.token_address,
