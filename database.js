@@ -21,6 +21,34 @@ const TransactionModel = mongoose.model('Transaction',
     }, { timestamps: true })
 );
 
+const BalanceLogModel = mongoose.model("BalanceLog",
+    new Schema({
+        pool_address: "string",
+        wallet_address: "string",
+        currencies: ["string"],
+        recorded_at: "number",
+        open_postion:"number",
+        tokens: [
+            {
+                token_address:"string",
+                stable:"string",
+                token_name:"string",
+                token_balance:"number",
+                exchange_rates:[
+                    {
+                        exchange_name:"string",
+                        rates:[
+                            {
+                                currency:"string",
+                                rate: "number"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+    }, { timestamps: true })
+);
 
 // Users
 var UserSchema = new Schema({
@@ -87,5 +115,5 @@ async function connectToDbAsync() {
 }
 
 module.exports = {
-    connectToDbAsync, UserModel, TransactionModel
+    connectToDbAsync, UserModel, TransactionModel, BalanceLogModel
 }
