@@ -1,10 +1,13 @@
+const path = require("path");
+require("dotenv").config({ path: 
+    path.resolve("../.env")
+});
 const Web3 = require('web3');
 const Bpool = require("../bpool/BPool.json");
 const { BinanceExchange, FTXExchange, CoinbaseExchange } = require("./exchanges");
 var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/8ccf688043c7498c81dbf85d6822e014"));
 var cron = require('node-cron');
 const { connectToDbAsync } = require("../database");
-const database = require('../database');
 
 const EXCHANGES = {
     FTX: new FTXExchange("k5wFuos6RP89rhuADliG2T6TqwV9O8lBplcZHUqT", "e1N-n2zFr1yczYDexWOwGO-auLRLtkrgIs707LMD"),
@@ -82,7 +85,7 @@ var getPoolWalletMetadata = async (
     }
 };
 
-async function check() {
+async function check(db) {
     let date = new Date();
     console.log("checking..." + date.toLocaleDateString() + " " + date.toLocaleTimeString())
     let users = await db.models.User.find().exec();
@@ -105,8 +108,9 @@ async function check() {
 
 connectToDbAsync()
     .then(async db => {
-        check();
-        cron.schedule('00 00 00,12 * * *', check())
+        //check();
+        console.log("connected");
+        cron.schedule('00 00 00,12 * * *', check(db))
     });
 
 
