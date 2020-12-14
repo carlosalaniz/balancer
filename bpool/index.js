@@ -20,8 +20,8 @@ class BPoolMonitor {
         metadata
     ) {
         this.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/" + this.infuraKey));
-        this.smartContract = new web3.eth.Contract(Bpool.abi, poolContractAddress);
-        
+        this.smartContract = new this.web3.eth.Contract(Bpool.abi, poolContractAddress);
+
         this.walletAddress = walletAddress;
         this.poolAddress = poolContractAddress;
         this.tokenAddress = tokenAddress;
@@ -56,16 +56,16 @@ class BPoolMonitor {
         try {
             await this.watchTokenIsValid;
             // Coin/Pool Address
-            let poolTokenBalance = +await smartContract.methods.getBalance(this.tokenAddress).call();
+            let poolTokenBalance = +await this.smartContract.methods.getBalance(this.tokenAddress).call();
 
             // Total Bpt supply
-            let totalShares = +await smartContract.methods.totalSupply().call();
+            let totalShares = +await this.smartContract.methods.totalSupply().call();
 
             // Wallet Balance 
-            let walletBalance = +await smartContract.methods.balanceOf(this.walletAddress).call();
+            let walletBalance = +await this.smartContract.methods.balanceOf(this.walletAddress).call();
 
             let myBalance = (poolTokenBalance / totalShares) * walletBalance;
-            myBalance = myBalance / Math.pow(10, await smartContract.methods.decimals().call());
+            myBalance = myBalance / Math.pow(10, await this.smartContract.methods.decimals().call());
             console.log("All calls successful, balance:", myBalance);
             return myBalance;
         } catch (e) {
