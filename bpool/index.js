@@ -19,10 +19,6 @@ class BPoolMonitor {
         onNewValue,
         metadata
     ) {
-        this.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/" + infuraKey));
-        this.smartContract = new this.web3.eth.Contract(Bpool.abi, poolContractAddress);
-
-
         this.walletAddress = walletAddress;
         this.poolAddress = poolContractAddress;
         this.tokenAddress = tokenAddress;
@@ -31,7 +27,7 @@ class BPoolMonitor {
         this.onNewValue = onNewValue;
         this.poolContractAddress = poolContractAddress;
         this.metadata = metadata;
-
+        this.infuraKey = infuraKey;
         this.watchTokenIsValid = new Promise((resolve, reject) => {
             this.smartContract.methods.getCurrentTokens().call().then(poolTokens => {
                 if (!poolTokens.includes(this.tokenAddress)) {
@@ -55,19 +51,23 @@ class BPoolMonitor {
 
     async getBpoolBalance() {
         try {
+            const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/" + this.infuraKey));
+            const smartContract = new web3.eth.Contract(Bpool.abi, poolContractAddress);
+
             await this.watchTokenIsValid;
             // Coin/Pool Address
-            let poolTokenBalance = +await this.smartContract.methods.getBalance(this.tokenAddress).call();
+            let poolTokenBalance = +await smartContract.methods.getBalance(this.tokenAddress).call();
 
             // Total Bpt supply
-            let totalShares = +await this.smartContract.methods.totalSupply().call();
+            let totalShares = +await smartContract.methods.totalSupply().call();
 
             // Wallet Balance 
-            let walletBalance = +await this.smartContract.methods.balanceOf(this.walletAddress).call();
+            let walletBalance = +await smartContract.methods.balanceOf(this.walletAddress).call();
 
             let myBalance = (poolTokenBalance / totalShares) * walletBalance;
+            myBalance = myBalance / Math.pow(10, await smartContract.methods.decimals().call());
             console.log("All calls successful, balance:", myBalance);
-            return myBalance / Math.pow(10, await this.smartContract.methods.decimals().call());
+            return myBalance;
         } catch (e) {
             console.error(e);
             this.stop(e);
