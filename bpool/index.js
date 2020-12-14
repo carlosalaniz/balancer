@@ -19,6 +19,9 @@ class BPoolMonitor {
         onNewValue,
         metadata
     ) {
+        this.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/" + this.infuraKey));
+        this.smartContract = new web3.eth.Contract(Bpool.abi, poolContractAddress);
+        
         this.walletAddress = walletAddress;
         this.poolAddress = poolContractAddress;
         this.tokenAddress = tokenAddress;
@@ -51,9 +54,6 @@ class BPoolMonitor {
 
     async getBpoolBalance() {
         try {
-            const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/" + this.infuraKey));
-            const smartContract = new web3.eth.Contract(Bpool.abi, poolContractAddress);
-
             await this.watchTokenIsValid;
             // Coin/Pool Address
             let poolTokenBalance = +await smartContract.methods.getBalance(this.tokenAddress).call();
