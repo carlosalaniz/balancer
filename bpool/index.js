@@ -19,36 +19,44 @@ class BPoolMonitor {
         onNewValue,
         metadata
     ) {
-        this.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/" + this.infuraKey));
-        this.smartContract = new this.web3.eth.Contract(Bpool.abi, poolContractAddress);
+        try {
+            const endpoint = "https://mainnet.infura.io/v3/" + infuraKey;
+            this.web3 = new Web3(new Web3.providers.HttpProvider(endpoint));
 
-        this.walletAddress = walletAddress;
-        this.poolAddress = poolContractAddress;
-        this.tokenAddress = tokenAddress;
+            this.smartContract = new this.web3.eth.Contract(Bpool.abi, poolContractAddress);
 
-        this.valueRefreshTime = valueRefreshTime;
-        this.onNewValue = onNewValue;
-        this.poolContractAddress = poolContractAddress;
-        this.metadata = metadata;
-        this.infuraKey = infuraKey;
-        this.watchTokenIsValid = new Promise((resolve, reject) => {
-            this.smartContract.methods.getCurrentTokens().call().then(poolTokens => {
-                if (!poolTokens.includes(this.tokenAddress)) {
-                    reject(`Token ${this.tokenAddress} is not valid for pool ${this.poolContractAddress}`);
-                }
-                resolve();
-            });
-        });
+            this.walletAddress = walletAddress;
+            this.poolAddress = poolContractAddress;
+            this.tokenAddress = tokenAddress;
 
-        // State management
-        this.state = {
-            startedAt: null,
-            lastUpdatedAt: null,
-            lastValue: null,
-            status: BPoolMonitor.MONITORSTATUS.STOPPED,
-            reason: undefined,
-            waitingForValue: false,
-            stopSignal: false
+            this.valueRefreshTime = valueRefreshTime;
+            this.onNewValue = onNewValue;
+            this.poolContractAddress = poolContractAddress;
+            this.metadata = metadata;
+            this.watchTokenIsValid = new Promise((resolve, reject) => {
+                this.smartContract.methods.getCurrentTokens().call().then(poolTokens => {
+                    if (!poolTokens.includes(this.tokenAddress)) {
+                        reject(`Token ${this.tokenAddress} is not valid for pool ${this.poolContractAddress}`);
+                    }
+                    resolve();
+                }).catch(e => {
+                    console.log("error", infuraKey);
+                    throw `${infuraKey}, ${walletAddress}`;
+                });
+            })
+
+            // State management
+            this.state = {
+                startedAt: null,
+                lastUpdatedAt: null,
+                lastValue: null,
+                status: BPoolMonitor.MONITORSTATUS.STOPPED,
+                reason: undefined,
+                waitingForValue: false,
+                stopSignal: false
+            }
+        } catch (e) {
+            console.error(e, "Init error");
         }
     }
 
