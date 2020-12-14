@@ -66,7 +66,7 @@ class BPoolMonitor {
             let walletBalance = +await this.smartContract.methods.balanceOf(this.walletAddress).call();
 
             let myBalance = (poolTokenBalance / totalShares) * walletBalance;
-
+            console.log("All calls successful, balance:", myBalance);
             return myBalance / Math.pow(10, await this.smartContract.methods.decimals().call());
         } catch (e) {
             console.error(e);
