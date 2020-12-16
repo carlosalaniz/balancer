@@ -97,7 +97,11 @@ async function check(db) {
                 m.wallet_address,
                 ["USD"]
             );
-            let ftx = new FTXExchange(m.trade_settings.ftx.FTX_KEY, m.trade_settings.ftx.FTX_SECRET);
+            let ftx = new FTXExchange(
+                m.trade_settings.ftx.FTX_KEY, 
+                m.trade_settings.ftx.FTX_SECRET, 
+                m.trade_settings.ftx.SUBACCOUNT || undefined
+            );
             let open_postion = await ftx.getPosition(m.market);
             metadata.open_postion = open_postion.size;
             let log = new db.models.BalanceLog(metadata);

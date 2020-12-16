@@ -1,14 +1,21 @@
 class ftx {
-    constructor(FTX_KEY, FTX_SECRET) {
+    constructor(FTX_KEY, FTX_SECRET, SUBACCOUNT_NAME) {
         this.FTX_KEY = FTX_KEY;
         this.FTX_SECRET = FTX_SECRET;
+
+        let headers = {
+            'FTX-KEY': this.FTX_KEY,
+            'X-Requested-With': 'XMLHttpRequest',
+            'content-type': 'application/json'
+        }
+
+        if(SUBACCOUNT_NAME){
+            headers['FTX-SUBACCOUNT'] =  encodeURI(SUBACCOUNT_NAME);
+        }
+
         this.axios = require('axios').create({
             baseURL: 'https://ftx.com',
-            headers: {
-                'FTX-KEY': this.FTX_KEY,
-                'X-Requested-With': 'XMLHttpRequest',
-                'content-type': 'application/json'
-            }
+            headers: headers
         });
     }
 
@@ -45,7 +52,6 @@ class ftx {
 
     async placeOrder(amount, side, future) {
         let path = "/api/orders";
-        let time = + new Date();
         let payload = {
             "market": future,
             "side": side,
@@ -57,6 +63,7 @@ class ftx {
             // "postOnly": false,
             // "clientId": null
         }
+        let time = + new Date();
         let response = await this.axios.post(path, payload, {
             headers: {
                 'FTX-TS': time.toString(),
@@ -78,8 +85,6 @@ class ftx {
     }
 
 }
-
-
 
 module.exports = {
     ftx

@@ -17,9 +17,9 @@ const onNewValue = async function (user_id, balanceTo, market, monitor_id,
     let min_delta = tradeSettings.min_delta;
     let max_delta = tradeSettings.max_delta;
 
-    let ftxClient = getFtxClient(tradeSettings.FTX_KEY, tradeSettings.FTX_SECRET);
-
+    
     try {
+        let ftxClient = getFtxClient(tradeSettings.FTX_KEY, tradeSettings.FTX_SECRET, tradeSettings.SUBACCOUNT);
         let start_position = (await ftxClient.getPosition(market)).size;
         let delta = (start_position - balanceTo.toFixed(2)).toFixed(2);
         let absDelta = Math.abs(delta);
@@ -80,8 +80,8 @@ const onNewValue = async function (user_id, balanceTo, market, monitor_id,
         throw e;
     }
 }
-const getFtxClient = function (FTX_KEY, FTX_SECRET) {
-    return new ftx(FTX_KEY, FTX_SECRET);
+const getFtxClient = function (FTX_KEY, FTX_SECRET, SUBACCOUNT) {
+    return new ftx(FTX_KEY, FTX_SECRET, SUBACCOUNT);
 }
 
 const doTransaction = async function (ftxClient, amount, market, transactionObject) {

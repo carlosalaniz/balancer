@@ -41,6 +41,7 @@ connectToDbAsync().then(database => {
     router.get("/login", _guest, async function (req, res) {
         res.render('login');
     });
+
     router.post("/login", _guest, async function (req, res) {
         const { email, password } = req.body;
         const user = await UserModel.findOne({ email: email }).exec();
@@ -49,12 +50,13 @@ connectToDbAsync().then(database => {
                 _id: user._id.toString(),
                 email: user.email
             };
-            if(!UserMonitorManagerMap[user._id.toString()]){
+            if (!UserMonitorManagerMap[user._id.toString()]) {
                 UserMonitorManagerMap[user._id.toString()] = new MonitorManager(user, database);
             }
         }
         res.redirect("back");
     });
+
     router.get("/logout", _user, async function (req, res) {
         req.session.destroy();
         res.redirect("back");
@@ -63,6 +65,7 @@ connectToDbAsync().then(database => {
     router.get("/register", _guest, async function (req, res) {
         res.render('register')
     });
+
     router.post("/register", _guest, async function (req, res) {
         const { email, password } = req.body;
         const user = await UserModel.findOne({ email: email }).exec();
@@ -79,7 +82,7 @@ connectToDbAsync().then(database => {
                 _id: newUser._id.toString(),
                 email: newUser.email
             };
-            if(!UserMonitorManagerMap[newUser._id.toString()]){
+            if (!UserMonitorManagerMap[newUser._id.toString()]) {
                 UserMonitorManagerMap[newUser._id.toString()] = new MonitorManager(newUser, database);
             }
             res.redirect("back");
@@ -100,14 +103,21 @@ connectToDbAsync().then(database => {
             min_delta,
             max_delta,
             refresh_rate,
+            infura_key,
             ftx_key,
-            ftx_secret
+            ftx_secret,
+            sub_account
         } = req.body;
         try {
-
             const user = await UserModel.findOne({ email: req.session.user.email }).exec();
             const monitorManager = UserMonitorManagerMap[user._id.toString()];
+
+            if (!sub_account || sub_account.length <= 0) {
+                sub_account = undefined;
+            }
+            
             const monitor = await user.monitors.create({
+                infura_key: infura_key,
                 pool_contract_address: pool_contract_address,
                 token_address: token_address,
                 wallet_address: wallet_address,
@@ -119,10 +129,12 @@ connectToDbAsync().then(database => {
                     refresh_rate: +refresh_rate,
                     ftx: {
                         FTX_KEY: ftx_key,
-                        FTX_SECRET: ftx_secret
+                        FTX_SECRET: ftx_secret,
+                        SUBACCOUNT: sub_account
                     }
                 }
             });
+
             user.monitors.push(monitor);
             monitorManager.add(monitor.toObject());
             await user.save();
@@ -132,6 +144,7 @@ connectToDbAsync().then(database => {
         }
         res.redirect("back");
     });
+
     router.get("/monitor/:id", _user, async function (req, res) {
         const { id } = req.params;
         const monitorManager = UserMonitorManagerMap[req.session.user._id];
@@ -144,6 +157,7 @@ connectToDbAsync().then(database => {
             res.redirect("..");
         }
     });
+
     router.get("/monitor/:id/transactions", _user, async function (req, res) {
         const { id } = req.params;
         const monitorManager = UserMonitorManagerMap[req.session.user._id];
@@ -158,6 +172,7 @@ connectToDbAsync().then(database => {
             res.redirect("..");
         }
     });
+
     router.post("/monitor/:id/transactions/:transaction_id/:action", _user, async function (req, res) {
         const { id, transaction_id, action } = req.params;
         const monitorManager = UserMonitorManagerMap[req.session.user._id];
@@ -181,6 +196,7 @@ connectToDbAsync().then(database => {
         }
         res.redirect("back");
     });
+
     router.post("/monitor/:id/:action", _user, async function (req, res) {
         const { id, action } = req.params;
         const monitorManager = UserMonitorManagerMap[req.session.user._id];

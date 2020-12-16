@@ -39,6 +39,7 @@ require("./database").connectToDbAsync().then(async (database) => {
                 max_delta: monitorConfiguration.trade_settings.max_delta,
                 FTX_KEY: monitorConfiguration.trade_settings.ftx.FTX_KEY,
                 FTX_SECRET: monitorConfiguration.trade_settings.ftx.FTX_SECRET,
+                SUBACCOUNT: monitorConfiguration.trade_settings.ftx.SUBACCOUNT,
             })
 
         switch ((transaction) ? transaction.status : transaction) {
@@ -76,8 +77,9 @@ require("./database").connectToDbAsync().then(async (database) => {
     async function completeTransaction(transaction_id) {
         let ftxClient = getFtxClient(
             monitorConfiguration.trade_settings.ftx.FTX_KEY,
-            monitorConfiguration.trade_settings.ftx.FTX_SECRET
-        )
+            monitorConfiguration.trade_settings.ftx.FTX_SECRET,
+            monitorConfiguration.trade_settings.ftx.SUBACCOUNT
+        );
         let transaction = await TransactionModel.findById(transaction_id).exec()
         if (transaction) {
             await doTransaction(ftxClient, transaction.amount, transaction.market, transaction);
