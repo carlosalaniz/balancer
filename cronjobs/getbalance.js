@@ -1,6 +1,7 @@
 const path = require("path");
-require("dotenv").config({ path: 
-    path.resolve("../.env")
+require("dotenv").config({
+    path:
+        path.resolve("../.env")
 });
 const Web3 = require('web3');
 const Bpool = require("../bpool/BPool.json");
@@ -18,6 +19,20 @@ const EXCHANGES = {
 const TokenMetadata = {
     "0xba100000625a3754423978a60c9317c58a424e3D": {
         name: "BAL",
+        decimals: 18,
+        exchanges: [
+            EXCHANGES.FTX,
+            EXCHANGES.Binance,
+            EXCHANGES.CoinBase
+        ]
+    },
+    "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": {
+        name: "WETH",
+        exchange_names: {
+            FTX: "ETH",
+            BINANCE: "ETH",
+            COINBASE: "ETH"
+        },
         decimals: 18,
         exchanges: [
             EXCHANGES.FTX,
@@ -59,13 +74,17 @@ var getPoolWalletMetadata = async (
                 var exchangeRates = exchanges ?
                     await Promise.all(
                         exchanges.map(async exchange => {
+                            let exchange_name = exchange.getName();
                             return {
-                                exchange_name: exchange.getName(),
+                                exchange_name: exchange_name,
                                 rates: await Promise.all(currencies_to_observe.map(async currencyCode => {
                                     if (!tokenMetaData.stable || tokenMetaData.currency !== currencyCode) {
+                                        let tokenName = (tokenMetaData.exchange_names &&
+                                            tokenMetaData.exchange_names[exchange_name]
+                                        ) || tokenMetaData.name;
                                         return {
                                             currency: currencyCode,
-                                            rate: await exchange.getRateAsync(tokenMetaData.name, currencyCode)
+                                            rate: await exchange.getRateAsync(tokenName, currencyCode)
                                         }
                                     }
                                 }))
@@ -98,21 +117,21 @@ async function check(db) {
                 ["USD"]
             );
             let ftx = new FTXExchange(
-                m.trade_settings.ftx.FTX_KEY, 
-                m.trade_settings.ftx.FTX_SECRET, 
+                m.trade_settings.ftx.FTX_KEY,
+                m.trade_settings.ftx.FTX_SECRET,
                 m.trade_settings.ftx.SUBACCOUNT || undefined
             );
             let open_postion = await ftx.getPosition(m.market);
             metadata.open_postion = open_postion.size;
             let log = new db.models.BalanceLog(metadata);
             await log.save();
+            console.log("Log saved.")
         })
     })
 }
 
 connectToDbAsync()
     .then(async db => {
-        //check();
         console.log("connected");
         cron.schedule('00 00 00,12 * * *', check(db))
     });

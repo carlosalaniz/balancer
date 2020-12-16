@@ -37,12 +37,7 @@ const BalanceLogModel = mongoose.model("BalanceLog",
                 exchange_rates: [
                     {
                         exchange_name: "string",
-                        rates: [
-                            {
-                                currency: "string",
-                                rate: "number"
-                            }
-                        ]
+                        rates: [{}]
                     }
                 ]
             }

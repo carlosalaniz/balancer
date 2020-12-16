@@ -1,17 +1,22 @@
 const crypto = require('crypto');
 class FTXExchange {
     static stable = {}
-    constructor(FTX_KEY, FTX_SECRET) {
+    constructor(FTX_KEY, FTX_SECRET, SUBACCOUNT_NAME) {
         this.exchangeName = "FTX";
         this.FTX_KEY = FTX_KEY;
         this.FTX_SECRET = FTX_SECRET;
+        let headers = {
+            'FTX-KEY': this.FTX_KEY,
+            'X-Requested-With': 'XMLHttpRequest',
+            'content-type': 'application/json'
+        }
+        if (SUBACCOUNT_NAME) {
+            headers['FTX-SUBACCOUNT'] = encodeURI(SUBACCOUNT_NAME);
+        }
+
         this.axios = require('axios').create({
             baseURL: 'https://ftx.com',
-            headers: {
-                'FTX-KEY': this.FTX_KEY,
-                'X-Requested-With': 'XMLHttpRequest',
-                'content-type': 'application/json'
-            }
+            headers: headers
         });
     }
     getSignature(time, method, api_enpoint, body) {
@@ -51,7 +56,7 @@ class FTXExchange {
                     error: e.response.data.error
                 }
             }
-            throw e;
+            //throw e;
         }
     }
 
@@ -62,7 +67,7 @@ class FTXExchange {
         if (futurePosition.length === 1) {
             return futurePosition[0];
         } else {
-            throw response;
+            //throw response;
         }
     }
     getName = () => this.exchangeName
@@ -119,7 +124,7 @@ class BinanceExchange {
                     error: e.response.data
                 }
             }
-            throw e;
+            //throw e;
         }
 
     }
@@ -164,7 +169,7 @@ class CoinbaseExchange {
                     error: e.response.data
                 }
             }
-            throw e;
+            //throw e;
         }
 
     }
