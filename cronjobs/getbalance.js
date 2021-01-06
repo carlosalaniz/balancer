@@ -130,13 +130,13 @@ async function check(db) {
     })
 }
 
-connectToDbAsync()
-    .then(async db => {
-        console.log("connected");
-        await check(db);
-        cron.schedule('00 00 00,12 * * *', () => check(db))
-    });
-
+cron.schedule('00 00 00,12 * * *', () => {
+    connectToDbAsync()
+        .then(async db => {
+            console.log("connected");
+            await check(db);
+        });
+})
 
 
 
