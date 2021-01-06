@@ -130,7 +130,7 @@ async function check(db) {
     })
 }
 
-let cronExp = '0/60 * * * * *'
+let cronExp = '0 6,18 * * *'
 console.log("Cron started " + cronExp);
 
 cron.schedule(cronExp, () => {
