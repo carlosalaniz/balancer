@@ -130,10 +130,14 @@ async function check(db) {
     })
 }
 
-cron.schedule('00 00 00,12 * * *', () => {
+let cronExp = '00 01 00,00 * * *'
+console.log("Cron started " + cronExp);
+
+cron.schedule(cronExp, () => {
     connectToDbAsync()
         .then(async db => {
             console.log("connected");
+            console.log("running:",  new Date());
             await check(db);
         });
 })
