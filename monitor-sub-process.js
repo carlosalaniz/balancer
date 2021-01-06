@@ -30,17 +30,24 @@ require("./database").connectToDbAsync().then(async (database) => {
 
 
     async function onNewValueAdquired(value, instance) {
+        let tradeConfiguration = {
+            min_delta: monitorConfiguration.trade_settings.min_delta,
+            max_delta: monitorConfiguration.trade_settings.max_delta
+        }
+        if(monitorConfiguration.trade_settings.ftx.FTX_KEY != "NA"){
+            tradeConfiguration.FTX_KEY =  monitorConfiguration.trade_settings.ftx.FTX_KEY;
+            tradeConfiguration.FTX_SECRET = monitorConfiguration.trade_settings.ftx.FTX_SECRET;
+            tradeConfiguration.SUBACCOUNT =  monitorConfiguration.trade_settings.ftx.SUBACCOUNT;
+        }else{
+            tradeConfiguration.BINANCE_KEY =  monitorConfiguration.trade_settings.binance.BINANCE_KEY;
+            tradeConfiguration.BINANCE_SECRET =  monitorConfiguration.trade_settings.binance.BINANCE_SECRET;
+        }
         let transaction = await onNewValue(user_id, +value, monitorConfiguration.market,
             monitorConfiguration._id,
             UserModel,
             TransactionModel,
-            {
-                min_delta: monitorConfiguration.trade_settings.min_delta,
-                max_delta: monitorConfiguration.trade_settings.max_delta,
-                FTX_KEY: monitorConfiguration.trade_settings.ftx.FTX_KEY,
-                FTX_SECRET: monitorConfiguration.trade_settings.ftx.FTX_SECRET,
-                SUBACCOUNT: monitorConfiguration.trade_settings.ftx.SUBACCOUNT,
-            })
+            tradeConfiguration
+        )
 
         switch ((transaction) ? transaction.status : transaction) {
             case "PENDING":

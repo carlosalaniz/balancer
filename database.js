@@ -78,9 +78,16 @@ var UserSchema = new Schema({
             ftx: {
                 type: {
                     FTX_KEY: "string",
-                    FTX_SECRET: "string"
+                    FTX_SECRET: "string",
+                    SUBACCOUNT: "string"
                 },
                 required: true
+            },
+            binance: {
+                type: {
+                    BINANCE_KEY: "string",
+                    BINANCE_SECRET: "string"
+                }
             }
         },
         state: "string",

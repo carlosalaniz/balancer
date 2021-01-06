@@ -95,7 +95,7 @@ connectToDbAsync().then(database => {
     });
 
     router.post("/monitor", _user, async function (req, res) {
-        const {
+        var {
             pool_contract_address,
             token_address,
             wallet_address,
@@ -106,7 +106,9 @@ connectToDbAsync().then(database => {
             infura_key,
             ftx_key,
             ftx_secret,
-            sub_account
+            sub_account,
+            binance_key,
+            binance_secret
         } = req.body;
         try {
             const user = await UserModel.findOne({ email: req.session.user.email }).exec();
@@ -115,8 +117,8 @@ connectToDbAsync().then(database => {
             if (!sub_account || sub_account.length <= 0) {
                 sub_account = undefined;
             }
-            
-            const monitor = await user.monitors.create({
+
+            let monitorModel = {
                 infura_key: infura_key,
                 pool_contract_address: pool_contract_address,
                 token_address: token_address,
@@ -127,13 +129,27 @@ connectToDbAsync().then(database => {
                     min_delta: +min_delta,
                     max_delta: +max_delta,
                     refresh_rate: +refresh_rate,
-                    ftx: {
-                        FTX_KEY: ftx_key,
-                        FTX_SECRET: ftx_secret,
-                        SUBACCOUNT: sub_account
-                    }
                 }
-            });
+            }
+            if (ftx_key) {
+                monitorModel.trade_settings.ftx = {
+                    FTX_KEY: ftx_key,
+                    FTX_SECRET: ftx_secret,
+                    SUBACCOUNT: sub_account
+                }
+            } else {
+                monitorModel.trade_settings.ftx = {
+                    FTX_KEY: "NA",
+                    FTX_SECRET: "NA",
+                    SUBACCOUNT: "NA"
+                }
+                monitorModel.trade_settings.binance = {
+                    BINANCE_KEY: binance_key,
+                    BINANCE_SECRET: binance_secret
+                }
+            }
+
+            const monitor = await user.monitors.create(monitorModel);
 
             user.monitors.push(monitor);
             monitorManager.add(monitor.toObject());

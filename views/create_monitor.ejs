@@ -10,21 +10,32 @@
                         "pool_contract_address",
                         "token_address",
                         "wallet_address",
-                        "market",
                         "min_delta",
                         "max_delta",
                         "refresh_rate",
+                        "infura_key",
+                        "\<hr>",
+                        "\<p>User exchange specific market\</p>",
+                        "\<hr>",
+                        "market",
+                        "\<hr>",
+                        "\<span>Only use one set of keys.\</span>",
+                        "\<hr>",
                         "ftx_key",
                         "ftx_secret",
-                        "infura_key",
-                        "sub_account"                    
+                        "sub_account",    
+                        "\<hr>",
+                        "binance_key",
+                        "binance_secret",                
                     ].forEach(field=>{%>
-                <%
-                    var title = field[0].toUpperCase() + field.slice(1).replace("_", " ");
-                %>
-                <label for="<%=field%>"><%=title%></label>
-                <input required type="text" class="form-control" id="<%=field%>" name="<%=field%>"
-                    aria-describedby="<%=field%>Help" placeholder="<%=title%>">
+                <%if(field.includes("\<")){%>
+                    <%-field%>
+                <%}else{%>
+                    <%var title = field[0].toUpperCase() + field.slice(1).replace("_", " "); %>
+                    <label for="<%=field%>"><%=title%></label>
+                    <input type="text" class="form-control" id="<%=field%>" name="<%=field%>"
+                        aria-describedby="<%=field%>Help" placeholder="<%=title%>">
+                <%}%>
                 <%})%>
             </div>
             <button type="submit" id="register-btn" class="btn btn-primary">Register</button>
