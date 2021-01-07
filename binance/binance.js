@@ -12,7 +12,7 @@ class binance {
             }
         });
     }
-
+    getName = () => "binance";
     getSignature(queryString) {
         const crypto = require('crypto');
         var hmac = crypto.createHmac('sha256', this.SECRET);
@@ -49,7 +49,7 @@ class binance {
         try {
             let accountInfo = await this.get(path);
             let position = accountInfo.data[0];
-            return { size: position.positionAmt };
+            return { size: Math.abs(position.positionAmt) };
         } catch (e) {
             if (e && e.response.status >= 400 && e.response.status < 500) {
                 return {
@@ -78,15 +78,15 @@ class binance {
     }
 
     async buy(amount, future) {
-        return await this.placeOrder(amount, true, future);
+        return await this.placeOrder(amount.toFixed(1), true, future);
     }
 
     async sell(amount, future) {
-        return await this.placeOrder(amount, false, future);
+        return await this.placeOrder(amount.toFixed(1), false, future);
     }
 
-    goLongBy = async (amount, future) => this.buy(amount, future);
-    goShortBy = async (amount, future) => this.sell(amount, future);
+    goLongBy = async (amount, future) => await this.buy(amount, future); Carlos
+    goShortBy = async (amount, future) => await this.sell(amount, future);
 }
 
 module.exports = { binance };

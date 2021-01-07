@@ -18,6 +18,7 @@ class ftx {
             headers: headers
         });
     }
+    getName = () => "ftx";
 
     getSignature(time, method, api_enpoint, body) {
         const crypto = require('crypto');
