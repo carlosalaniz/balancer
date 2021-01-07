@@ -27,7 +27,12 @@ const onNewValue = async function (user_id, balanceTo, market, monitor_id,
             exgClient = getBinanceClient(tradeSettings.BINANCE_KEY, tradeSettings.BINANCE_SECRET);
         }
         let start_position = (await exgClient.getPosition(market)).size;
-        let delta = (start_position - balanceTo.toFixed(2)).toFixed(2);
+        let delta = 0;
+        if(exgClient.getName() === "ftx"){
+            delta = (start_position - balanceTo.toFixed(2)).toFixed(2);
+        }else{
+            delta = (start_position - balanceTo.toFixed(1)).toFixed(1);
+        }
         let absDelta = Math.abs(delta);
         let transaction = null;
         let pendingTransactions = user.monitors[m_index].transactions.filter(e => e.status === "PENDING");
